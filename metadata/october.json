@@ -1,0 +1,19 @@
+{
+  "name": "Pharos Atlantic October 2025",
+  "description": "This NFT certifies participation in the Pharos Atlantic testnet during October. Awarded to active community members who contributed to the network.",
+  "image": "ipfs://bafybeihdpsftqcbgijx5bjxq6p3mhn67g4mscqyyqxl5kyzr3ynqy32g2y",
+  "attributes": [
+    {
+      "trait_type": "Month",
+      "value": "October"
+    },
+    {
+      "trait_type": "Year",
+      "value": "2025"
+    },
+    {
+      "trait_type": "Activity Type",
+      "value": "Testnet Participation"
+    }
+  ]
+}

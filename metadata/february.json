@@ -1,0 +1,19 @@
+{
+  "name": "Pharos Atlantic February 2026",
+  "description": "This NFT certifies participation in the Pharos Atlantic testnet during February. Awarded to active community members who contributed to the network.",
+  "image": "ipfs://bafybeie4zpu5a2a77q5nxofotelgamcybo722pqfx5uowh66xbmaxkgiqe",
+  "attributes": [
+    {
+      "trait_type": "Month",
+      "value": "February"
+    },
+    {
+      "trait_type": "Year",
+      "value": "2026"
+    },
+    {
+      "trait_type": "Activity Type",
+      "value": "Testnet Participation"
+    }
+  ]
+}
