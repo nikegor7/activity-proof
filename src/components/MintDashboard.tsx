@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { useActivityCheck } from '@/hooks/useActivityCheck';
 import { MintCard } from './MintCard';
@@ -12,10 +13,26 @@ interface MintDashboardProps {
 }
 
 export function MintDashboard({ chainSlug }: MintDashboardProps) {
+  const [mounted, setMounted] = useState(false);
   const { isConnected } = useAccount();
   const { results, isCheckingAll, refreshActivity } = useActivityCheck(chainSlug);
   const monthConfigs = getMonthConfigsForChain(chainSlug);
   const chain = CHAINS[chainSlug];
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Show loading placeholder during SSR to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="text-center py-16">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-800 mb-4 animate-pulse" />
+        <div className="h-6 w-48 bg-gray-800 rounded mx-auto mb-2 animate-pulse" />
+        <div className="h-4 w-64 bg-gray-800 rounded mx-auto animate-pulse" />
+      </div>
+    );
+  }
 
   if (!isConnected) {
     return (

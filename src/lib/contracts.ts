@@ -119,12 +119,72 @@ const PHAROS_ATLANTIC_MONTHS: MonthConfig[] = [
   },
 ];
 
+// IOPN Testnet month configurations
+// Uses timestamp-based activity verification (block ranges are wide)
+const IOPN_TESTNET_MONTHS: MonthConfig[] = [
+  {
+    name: 'September',
+    year: 2025,
+    chainSlug: 'iopn-testnet',
+    contractAddress: (process.env.NEXT_PUBLIC_IOPN_SEPTEMBER_ADDRESS || '0x') as `0x${string}`,
+    startBlock: 0,
+    endBlock: 99999999,
+    metadataURI: '',
+  },
+  {
+    name: 'October',
+    year: 2025,
+    chainSlug: 'iopn-testnet',
+    contractAddress: (process.env.NEXT_PUBLIC_IOPN_OCTOBER_ADDRESS || '0x') as `0x${string}`,
+    startBlock: 0,
+    endBlock: 99999999,
+    metadataURI: '',
+  },
+  {
+    name: 'November',
+    year: 2025,
+    chainSlug: 'iopn-testnet',
+    contractAddress: (process.env.NEXT_PUBLIC_IOPN_NOVEMBER_ADDRESS || '0x') as `0x${string}`,
+    startBlock: 0,
+    endBlock: 99999999,
+    metadataURI: '',
+  },
+  {
+    name: 'December',
+    year: 2025,
+    chainSlug: 'iopn-testnet',
+    contractAddress: (process.env.NEXT_PUBLIC_IOPN_DECEMBER_ADDRESS || '0x') as `0x${string}`,
+    startBlock: 0,
+    endBlock: 99999999,
+    metadataURI: '',
+  },
+  {
+    name: 'January',
+    year: 2026,
+    chainSlug: 'iopn-testnet',
+    contractAddress: (process.env.NEXT_PUBLIC_IOPN_JANUARY_ADDRESS || '0x') as `0x${string}`,
+    startBlock: 0,
+    endBlock: 99999999,
+    metadataURI: '',
+  },
+  {
+    name: 'February',
+    year: 2026,
+    chainSlug: 'iopn-testnet',
+    contractAddress: (process.env.NEXT_PUBLIC_IOPN_FEBRUARY_ADDRESS || '0x') as `0x${string}`,
+    startBlock: 0,
+    endBlock: 99999999,
+    metadataURI: '',
+  },
+];
+
 // Registry of all chain month configs
 const CHAIN_MONTH_CONFIGS: Record<ChainId, MonthConfig[]> = {
   'pharos-atlantic': PHAROS_ATLANTIC_MONTHS,
   'ethereum-sepolia': [], // To be configured when chain is active
   'base-sepolia': [],     // To be configured when chain is active
   'arbitrum-sepolia': [], // To be configured when chain is active
+  'iopn-testnet': IOPN_TESTNET_MONTHS,
 };
 
 // Get month configs for a specific chain

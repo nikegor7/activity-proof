@@ -76,8 +76,26 @@ export const arbitrumSepolia = defineChain({
   testnet: true,
 });
 
+export const iopnTestnet = defineChain({
+  id: CHAINS['iopn-testnet'].id,
+  name: CHAINS['iopn-testnet'].name,
+  nativeCurrency: CHAINS['iopn-testnet'].nativeCurrency,
+  rpcUrls: {
+    default: {
+      http: [CHAINS['iopn-testnet'].rpcUrl],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: 'IOPN Explorer',
+      url: CHAINS['iopn-testnet'].explorerUrl,
+    },
+  },
+  testnet: true,
+});
+
 // All supported chains
-const chains = [pharosTestnet, ethereumSepolia, baseSepolia, arbitrumSepolia] as const;
+const chains = [pharosTestnet, ethereumSepolia, baseSepolia, arbitrumSepolia, iopnTestnet] as const;
 
 export const config = createConfig({
   chains,
@@ -89,6 +107,7 @@ export const config = createConfig({
     [ethereumSepolia.id]: http(),
     [baseSepolia.id]: http(),
     [arbitrumSepolia.id]: http(),
+    [iopnTestnet.id]: http(),
   },
 });
 

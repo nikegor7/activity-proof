@@ -1,7 +1,7 @@
 // Supported chain identifiers
-export type ChainId = 'pharos-atlantic' | 'ethereum-sepolia' | 'base-sepolia' | 'arbitrum-sepolia';
+export type ChainId = 'pharos-atlantic' | 'ethereum-sepolia' | 'base-sepolia' | 'arbitrum-sepolia' | 'iopn-testnet';
 
-export type Month = 'October' | 'November' | 'December' | 'January' | 'February';
+export type Month = 'September' | 'October' | 'November' | 'December' | 'January' | 'February';
 
 // Chain configuration for multi-chain support
 export interface ChainConfig {

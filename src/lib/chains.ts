@@ -70,6 +70,23 @@ export const CHAINS: Record<ChainId, ChainConfig> = {
     isTestnet: true,
     isActive: false, // Not yet supported
   },
+  'iopn-testnet': {
+    id: 984,
+    slug: 'iopn-testnet',
+    name: 'IOPN Testnet',
+    shortName: 'IOPN',
+    nativeCurrency: {
+      name: 'OPN',
+      symbol: 'OPN',
+      decimals: 18,
+    },
+    rpcUrl: process.env.NEXT_PUBLIC_IOPN_RPC_URL || 'https://testnet-rpc.iopn.tech',
+    explorerUrl: 'https://testnet.iopn.tech',
+    explorerApiUrl: 'https://testnet.iopn.tech/api',
+    iconColor: 'from-emerald-500 to-teal-400',
+    isTestnet: true,
+    isActive: true,
+  },
 };
 
 // Get all chains

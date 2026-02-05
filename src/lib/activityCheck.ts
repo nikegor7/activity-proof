@@ -5,6 +5,9 @@ import { CHAINS } from './chains';
 const BLOCK_CHUNK_SIZE = 50000;
 const MAX_CONCURRENT_REQUESTS = 5;
 
+// Chains that use timestamp-based verification instead of block ranges
+const TIMESTAMP_BASED_CHAINS: ChainId[] = ['iopn-testnet'];
+
 interface TxListResponse {
   status: string;
   message: string;
@@ -16,6 +19,26 @@ interface TxListResponse {
     to: string;
     value: string;
   }>;
+}
+
+// Get Unix timestamp range for a month
+function getMonthTimestampRange(month: Month, year: number): { start: number; end: number } {
+  const monthIndex: Record<Month, number> = {
+    September: 8,
+    October: 9,
+    November: 10,
+    December: 11,
+    January: 0,
+    February: 1,
+  };
+
+  const startDate = new Date(Date.UTC(year, monthIndex[month], 1, 0, 0, 0));
+  const endDate = new Date(Date.UTC(year, monthIndex[month] + 1, 0, 23, 59, 59));
+
+  return {
+    start: Math.floor(startDate.getTime() / 1000),
+    end: Math.floor(endDate.getTime() / 1000),
+  };
 }
 
 function getCacheKey(address: string, chainSlug: ChainId, month: Month): string {
@@ -53,6 +76,8 @@ function getApiKey(chainSlug: ChainId): string {
       return process.env.NEXT_PUBLIC_BASESCAN_API_KEY || '';
     case 'arbitrum-sepolia':
       return process.env.NEXT_PUBLIC_ARBISCAN_API_KEY || '';
+    case 'iopn-testnet':
+      return process.env.NEXT_PUBLIC_IOPN_API_KEY || '';
     default:
       return '';
   }
@@ -72,6 +97,37 @@ async function fetchTransactions(
     const response = await fetch(url);
     const data: TxListResponse = await response.json();
     return data.status === '1' && data.result && data.result.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+// Fetch all transactions and filter by timestamp for chains without block-based limits
+async function checkActivityByTimestamp(
+  address: string,
+  chainSlug: ChainId,
+  month: Month,
+  year: number
+): Promise<boolean> {
+  const chain = CHAINS[chainSlug];
+  const apiKey = getApiKey(chainSlug);
+  const { start: startTimestamp, end: endTimestamp } = getMonthTimestampRange(month, year);
+
+  const url = `${chain.explorerApiUrl}?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=1000&sort=asc&apikey=${apiKey}`;
+
+  try {
+    const response = await fetch(url);
+    const data: TxListResponse = await response.json();
+
+    if (data.status !== '1' || !data.result || data.result.length === 0) {
+      return false;
+    }
+
+    // Filter transactions by timestamp
+    return data.result.some((tx) => {
+      const txTimestamp = parseInt(tx.timeStamp, 10);
+      return txTimestamp >= startTimestamp && txTimestamp <= endTimestamp;
+    });
   } catch {
     return false;
   }
@@ -106,6 +162,16 @@ export async function checkActivityForMonth(
     throw new Error(`Invalid month: ${month} for chain: ${chainSlug}`);
   }
 
+  // Use timestamp-based verification for certain chains
+  if (TIMESTAMP_BASED_CHAINS.includes(chainSlug)) {
+    onProgress?.(0, 1);
+    const hasActivity = await checkActivityByTimestamp(address, chainSlug, month, config.year);
+    onProgress?.(1, 1);
+    setCachedResult(address, chainSlug, month, hasActivity);
+    return hasActivity;
+  }
+
+  // Block-based verification for other chains
   const { startBlock, endBlock } = config;
   const totalBlocks = endBlock - startBlock;
   const totalChunks = Math.ceil(totalBlocks / BLOCK_CHUNK_SIZE);
@@ -143,6 +209,7 @@ export async function checkAllMonthsActivity(
   onMonthComplete?: (month: Month, hasActivity: boolean) => void
 ): Promise<Record<Month, boolean>> {
   const results: Record<Month, boolean> = {
+    September: false,
     October: false,
     November: false,
     December: false,

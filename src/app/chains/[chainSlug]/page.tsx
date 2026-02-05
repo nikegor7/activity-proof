@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ConnectButton } from '@/components/ConnectButton';
 import { MintDashboard } from '@/components/MintDashboard';
+import { ChainSwitcher } from '@/components/ChainSwitcher';
+import { NetworkWarning } from '@/components/NetworkWarning';
 import { CHAINS, isValidChainSlug, isChainActive } from '@/lib/chains';
 import type { ChainId } from '@/types';
 
@@ -68,6 +70,9 @@ export default async function ChainPage({ params }: ChainPageProps) {
       <Header chainSlug={chainSlug as ChainId} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Network Warning */}
+        <NetworkWarning expectedChainSlug={chainSlug as ChainId} />
+
         {/* Hero Section */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">
@@ -160,8 +165,6 @@ export default async function ChainPage({ params }: ChainPageProps) {
 }
 
 function Header({ chainSlug }: { chainSlug: ChainId }) {
-  const chain = CHAINS[chainSlug];
-
   return (
     <header className="border-b border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -169,15 +172,12 @@ function Header({ chainSlug }: { chainSlug: ChainId }) {
           <div className="flex items-center gap-4">
             <Link href="/" className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-blue-600" />
-              <span className="text-lg font-semibold text-white">
+              <span className="text-lg font-semibold text-white hidden sm:block">
                 Activity Proof
               </span>
             </Link>
             <span className="text-gray-600">/</span>
-            <div className="flex items-center gap-2">
-              <div className={`w-5 h-5 rounded-md bg-gradient-to-br ${chain.iconColor}`} />
-              <span className="text-sm text-gray-400">{chain.shortName}</span>
-            </div>
+            <ChainSwitcher currentChainSlug={chainSlug} />
           </div>
           <ConnectButton />
         </div>

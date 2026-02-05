@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/utils/Pausable.sol";
 
 /**
  * @title ActivityNFT
- * @notice Free mint NFT contract for Pharos Atlantic monthly activity rewards
+ * @notice Free mint NFT contract for multi-chain monthly activity rewards
  * @dev Deploy one contract per month (October, November, December)
  *      Activity verification happens off-chain in the frontend
  */

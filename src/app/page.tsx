@@ -1,12 +1,7 @@
-import Link from 'next/link';
 import { ConnectButton } from '@/components/ConnectButton';
-import { getAllChains } from '@/lib/chains';
+import { ChainGrid } from '@/components/ChainGrid';
 
 export default function Home() {
-  const chains = getAllChains();
-  const activeChains = chains.filter((chain) => chain.isActive);
-  const comingSoonChains = chains.filter((chain) => !chain.isActive);
-
   return (
     <div className="min-h-screen">
       {/* Header */}
@@ -37,70 +32,11 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Active Chains */}
-        <section className="mb-16">
-          <h2 className="text-2xl font-semibold text-white mb-6">Available Networks</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {activeChains.map((chain) => (
-              <Link
-                key={chain.slug}
-                href={`/chains/${chain.slug}`}
-                className="group p-6 bg-gray-800/50 rounded-xl border border-gray-700 hover:border-gray-500 hover:bg-gray-800 transition-all"
-              >
-                <div className="flex items-center gap-4 mb-4">
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${chain.iconColor}`} />
-                  <div>
-                    <h3 className="text-lg font-semibold text-white group-hover:text-blue-400 transition-colors">
-                      {chain.shortName}
-                    </h3>
-                    <p className="text-sm text-gray-500">{chain.name}</p>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/20 text-green-400">
-                    Active
-                  </span>
-                  <svg
-                    className="w-5 h-5 text-gray-500 group-hover:text-white group-hover:translate-x-1 transition-all"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        {/* Coming Soon Chains */}
-        {comingSoonChains.length > 0 && (
-          <section className="mb-16">
-            <h2 className="text-2xl font-semibold text-white mb-6">Coming Soon</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {comingSoonChains.map((chain) => (
-                <div
-                  key={chain.slug}
-                  className="p-6 bg-gray-800/30 rounded-xl border border-gray-800 opacity-60"
-                >
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${chain.iconColor} opacity-50`} />
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-400">
-                        {chain.shortName}
-                      </h3>
-                      <p className="text-sm text-gray-600">{chain.name}</p>
-                    </div>
-                  </div>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-700 text-gray-400">
-                    Coming Soon
-                  </span>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+        {/* Chain Grid with Filters */}
+        <div className="mb-16">
+          <h2 className="text-2xl font-semibold text-white mb-6">Networks</h2>
+          <ChainGrid />
+        </div>
 
         {/* How It Works */}
         <section>
