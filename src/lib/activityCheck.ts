@@ -3,10 +3,15 @@ import { getMonthConfigsForChain } from './contracts';
 import { CHAINS } from './chains';
 
 const BLOCK_CHUNK_SIZE = 50000;
+const IOPN_BLOCK_CHUNK_SIZE = 500000;
 const MAX_CONCURRENT_REQUESTS = 5;
+const IOPN_MAX_CONCURRENT_REQUESTS = 2;
+
+// Chains that need server-side proxy (no CORS headers on explorer API)
+const PROXY_CHAINS: ChainId[] = ['iopn-testnet'];
 
 // Chains that use timestamp-based verification instead of block ranges
-const TIMESTAMP_BASED_CHAINS: ChainId[] = ['iopn-testnet'];
+const TIMESTAMP_BASED_CHAINS: ChainId[] = [];
 
 interface TxListResponse {
   status: string;
@@ -89,9 +94,16 @@ async function fetchTransactions(
   startBlock: number,
   endBlock: number
 ): Promise<boolean> {
-  const chain = CHAINS[chainSlug];
-  const apiKey = getApiKey(chainSlug);
-  const url = `${chain.explorerApiUrl}?module=account&action=txlist&address=${address}&startblock=${startBlock}&endblock=${endBlock}&page=1&offset=1&sort=asc&apikey=${apiKey}`;
+  let url: string;
+
+  if (PROXY_CHAINS.includes(chainSlug)) {
+    // Use server-side proxy to avoid CORS issues
+    url = `/api/explorer?chain=${chainSlug}&address=${address}&startblock=${startBlock}&endblock=${endBlock}&page=1&offset=1&sort=asc`;
+  } else {
+    const chain = CHAINS[chainSlug];
+    const apiKey = getApiKey(chainSlug);
+    url = `${chain.explorerApiUrl}?module=account&action=txlist&address=${address}&startblock=${startBlock}&endblock=${endBlock}&page=1&offset=1&sort=asc&apikey=${apiKey}`;
+  }
 
   try {
     const response = await fetch(url);
@@ -173,20 +185,22 @@ export async function checkActivityForMonth(
 
   // Block-based verification for other chains
   const { startBlock, endBlock } = config;
+  const chunkSize = PROXY_CHAINS.includes(chainSlug) ? IOPN_BLOCK_CHUNK_SIZE : BLOCK_CHUNK_SIZE;
+  const maxConcurrent = PROXY_CHAINS.includes(chainSlug) ? IOPN_MAX_CONCURRENT_REQUESTS : MAX_CONCURRENT_REQUESTS;
   const totalBlocks = endBlock - startBlock;
-  const totalChunks = Math.ceil(totalBlocks / BLOCK_CHUNK_SIZE);
+  const totalChunks = Math.ceil(totalBlocks / chunkSize);
 
   // Create all chunks
   const chunks: Array<{ start: number; end: number }> = [];
   for (let i = 0; i < totalChunks; i++) {
-    const chunkStart = startBlock + i * BLOCK_CHUNK_SIZE;
-    const chunkEnd = Math.min(chunkStart + BLOCK_CHUNK_SIZE - 1, endBlock);
+    const chunkStart = startBlock + i * chunkSize;
+    const chunkEnd = Math.min(chunkStart + chunkSize - 1, endBlock);
     chunks.push({ start: chunkStart, end: chunkEnd });
   }
 
   // Process chunks in batches with early exit
   let checkedChunks = 0;
-  for (let i = 0; i < chunks.length; i += MAX_CONCURRENT_REQUESTS) {
+  for (let i = 0; i < chunks.length; i += maxConcurrent) {
     const batch = chunks.slice(i, i + MAX_CONCURRENT_REQUESTS);
     const hasActivity = await checkChunkBatch(address, chainSlug, batch);
 

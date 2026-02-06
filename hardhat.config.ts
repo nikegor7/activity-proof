@@ -21,6 +21,11 @@ const config: HardhatUserConfig = {
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
       chainId: 688689,
     },
+    iopn_testnet: {
+      url: process.env.IOPN_RPC_URL || "https://testnet-rpc.iopn.tech",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      chainId: 984,
+    },
   },
   paths: {
     sources: "./contracts",

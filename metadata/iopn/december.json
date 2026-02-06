@@ -1,0 +1,19 @@
+{
+  "name": "IOPN Testnet December 2025",
+  "description": "This NFT certifies participation in the IOPN testnet during December. Awarded to active community members who contributed to the network.",
+  "image": "ipfs://bafybeibdox6q6nj4v4utpvaqvapudkrnmyeb6aol7wlzmjrcp4gdlof4xq",
+  "attributes": [
+    {
+      "trait_type": "Month",
+      "value": "December"
+    },
+    {
+      "trait_type": "Year",
+      "value": "2025"
+    },
+    {
+      "trait_type": "Activity Type",
+      "value": "Testnet Participation"
+    }
+  ]
+}

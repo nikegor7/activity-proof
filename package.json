@@ -10,7 +10,9 @@
     "lint": "eslint",
     "compile": "hardhat compile",
     "test:contracts": "hardhat test",
-    "deploy": "hardhat run scripts/deploy.ts --network pharos_testnet"
+    "deploy": "hardhat run scripts/deploy.ts --network pharos_testnet",
+    "deploy:iopn": "hardhat run scripts/deploy-iopn.ts --network iopn_testnet",
+    "deploy:iopn:all": "DEPLOY_ALL=true hardhat run scripts/deploy-iopn.ts --network iopn_testnet"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.4.0",
