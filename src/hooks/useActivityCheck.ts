@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAccount } from 'wagmi';
 import { type Month, type ActivityResult, type ChainId } from '@/types';
 import { checkActivityForMonth, checkAllMonthsActivity, clearActivityCache } from '@/lib/activityCheck';
@@ -24,6 +24,7 @@ export function useActivityCheck(chainSlug: ChainId) {
     return initial;
   });
   const [isCheckingAll, setIsCheckingAll] = useState(false);
+  const checkingRef = useRef(false);
 
   const checkMonth = useCallback(
     async (month: Month) => {
@@ -55,7 +56,8 @@ export function useActivityCheck(chainSlug: ChainId) {
   );
 
   const checkAllMonths = useCallback(async () => {
-    if (!address) return;
+    if (!address || checkingRef.current) return;
+    checkingRef.current = true;
 
     setIsCheckingAll(true);
 
@@ -92,6 +94,7 @@ export function useActivityCheck(chainSlug: ChainId) {
       });
     } finally {
       setIsCheckingAll(false);
+      checkingRef.current = false;
     }
   }, [address, chainSlug, monthConfigs]);
 

@@ -38,7 +38,7 @@ async function main() {
       console.log(`NEXT_PUBLIC_IOPN_${month.toUpperCase()}_ADDRESS=${address}`);
     }
   } else {
-    const month = monthArg || process.env.DEPLOY_MONTH || "December";
+    const month = monthArg || process.env.DEPLOY_MONTH || "February";
     await deployMonth(month);
   }
 }
@@ -55,9 +55,14 @@ async function deployMonth(month: string): Promise<string> {
   console.log(`  Default URI: ${config.defaultTokenURI || "(not set)"}`);
 
   const ActivityNFT = await ethers.getContractFactory("ActivityNFT");
+  const [signer] = await ethers.getSigners();
+  const signerAddress = await signer.getAddress();
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
+      const onChainNonce = await ethers.provider.getTransactionCount(signerAddress, "latest");
+      const nonce = process.env.FORCE_NONCE ? parseInt(process.env.FORCE_NONCE) : onChainNonce;
+      console.log(`  Using nonce: ${nonce} (on-chain: ${onChainNonce})`);
       const activityNFT = await ActivityNFT.deploy(
         config.name,
         config.symbol,
@@ -66,6 +71,7 @@ async function deployMonth(month: string): Promise<string> {
         {
           gasPrice: ethers.parseUnits("7", "gwei"),
           gasLimit: 3000000,
+          nonce,
         }
       );
 
@@ -79,8 +85,9 @@ async function deployMonth(month: string): Promise<string> {
       return address;
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : String(error);
-      if ((msg.includes("mempool is full") || msg.includes("mempool")) && attempt < maxRetries) {
-        console.log(`  Attempt ${attempt}/${maxRetries} failed (${msg.includes("already in mempool") ? "tx already in mempool" : "mempool full"}). Retrying in ${retryDelay / 1000}s...`);
+      const isRetryable = msg.includes("mempool") || msg.includes("nonce");
+      if (isRetryable && attempt < maxRetries) {
+        console.log(`  Attempt ${attempt}/${maxRetries} failed (${msg.slice(0, 60)}). Retrying in ${retryDelay / 1000}s...`);
         await new Promise((r) => setTimeout(r, retryDelay));
       } else {
         throw error;

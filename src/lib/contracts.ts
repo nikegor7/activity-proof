@@ -173,7 +173,7 @@ const IOPN_TESTNET_MONTHS: MonthConfig[] = [
     chainSlug: 'iopn-testnet',
     contractAddress: (process.env.NEXT_PUBLIC_IOPN_FEBRUARY_ADDRESS || '0x') as `0x${string}`,
     startBlock: 9916801,
-    endBlock: 99999999,
+    endBlock: 11850000,
     metadataURI: 'ipfs://bafkreig62kkt2cteibt4lmxil6roa63odj5wmtdhgp6mwn2l44xpig7cyq',
   },
 ];
