@@ -15,7 +15,7 @@ interface MintDashboardProps {
 export function MintDashboard({ chainSlug }: MintDashboardProps) {
   const [mounted, setMounted] = useState(false);
   const { isConnected } = useAccount();
-  const { results, isCheckingAll, refreshActivity } = useActivityCheck(chainSlug);
+  const { results, isCheckingAll, checkMonth, refreshActivity } = useActivityCheck(chainSlug);
   const monthConfigs = getMonthConfigsForChain(chainSlug);
   const chain = CHAINS[chainSlug];
 
@@ -130,6 +130,7 @@ export function MintDashboard({ chainSlug }: MintDashboardProps) {
             chainSlug={chainSlug}
             month={config.name as Month}
             activity={results[config.name as Month]}
+            onCheckEligibility={() => checkMonth(config.name as Month)}
           />
         ))}
       </div>

@@ -11,9 +11,10 @@ interface MintCardProps {
   chainSlug: ChainId;
   month: Month;
   activity: ActivityResult;
+  onCheckEligibility?: () => void;
 }
 
-export function MintCard({ chainSlug, month, activity }: MintCardProps) {
+export function MintCard({ chainSlug, month, activity, onCheckEligibility }: MintCardProps) {
   const {
     hasMinted,
     isLoadingMintStatus,
@@ -96,11 +97,11 @@ export function MintCard({ chainSlug, month, activity }: MintCardProps) {
             <span className="px-3 py-1 text-xs font-medium bg-blue-500 text-white rounded-full">
               Eligible
             </span>
-          ) : (
+          ) : activity?.isChecked ? (
             <span className="px-3 py-1 text-xs font-medium bg-gray-600 text-gray-300 rounded-full">
               No Activity
             </span>
-          )}
+          ) : null}
         </div>
       </div>
 
@@ -149,8 +150,18 @@ export function MintCard({ chainSlug, month, activity }: MintCardProps) {
           </div>
         )}
 
+        {/* Not Checked State - Show check button */}
+        {!isLoading && !activity?.isChecked && !hasMinted && onCheckEligibility && (
+          <button
+            onClick={onCheckEligibility}
+            className="mt-3 w-full py-2 px-4 text-sm font-medium text-gray-300 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
+          >
+            Check eligibility
+          </button>
+        )}
+
         {/* No Activity State */}
-        {!isLoading && !activity?.hasActivity && !hasMinted && (
+        {!isLoading && activity?.isChecked && !activity?.hasActivity && !hasMinted && (
           <p className="mt-2 text-sm text-gray-500">
             No transactions found in {month}
           </p>

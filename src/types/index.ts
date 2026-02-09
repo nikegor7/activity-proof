@@ -38,6 +38,7 @@ export interface ActivityResult {
   chainSlug: ChainId;
   hasActivity: boolean;
   isLoading: boolean;
+  isChecked: boolean;
   error: string | null;
 }
 

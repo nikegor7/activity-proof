@@ -6,6 +6,16 @@ import { type Month, type ActivityResult, type ChainId } from '@/types';
 import { checkActivityForMonth, checkAllMonthsActivity, clearActivityCache } from '@/lib/activityCheck';
 import { getMonthConfigsForChain } from '@/lib/contracts';
 
+// Determine the current month name from the date
+function getCurrentMonth(): Month | null {
+  const monthNames: Month[] = [
+    'January', 'February', 'September', 'October', 'November', 'December',
+  ];
+  const now = new Date();
+  const name = now.toLocaleString('en-US', { month: 'long' }) as Month;
+  return monthNames.includes(name) ? name : null;
+}
+
 export function useActivityCheck(chainSlug: ChainId) {
   const { address, isConnected } = useAccount();
   const monthConfigs = getMonthConfigsForChain(chainSlug);
@@ -18,6 +28,7 @@ export function useActivityCheck(chainSlug: ChainId) {
         chainSlug,
         hasActivity: false,
         isLoading: false,
+        isChecked: false,
         error: null,
       };
     });
@@ -39,7 +50,7 @@ export function useActivityCheck(chainSlug: ChainId) {
         const hasActivity = await checkActivityForMonth(address, chainSlug, month);
         setResults((prev) => ({
           ...prev,
-          [month]: { ...prev[month], hasActivity, isLoading: false },
+          [month]: { ...prev[month], hasActivity, isLoading: false, isChecked: true },
         }));
       } catch (error) {
         setResults((prev) => ({
@@ -47,6 +58,7 @@ export function useActivityCheck(chainSlug: ChainId) {
           [month]: {
             ...prev[month],
             isLoading: false,
+            isChecked: true,
             error: error instanceof Error ? error.message : 'Failed to check activity',
           },
         }));
@@ -74,7 +86,7 @@ export function useActivityCheck(chainSlug: ChainId) {
       await checkAllMonthsActivity(address, chainSlug, (month, hasActivity) => {
         setResults((prev) => ({
           ...prev,
-          [month]: { ...prev[month], hasActivity, isLoading: false },
+          [month]: { ...prev[month], hasActivity, isLoading: false, isChecked: true },
         }));
       });
     } catch (error) {
@@ -86,6 +98,7 @@ export function useActivityCheck(chainSlug: ChainId) {
             updated[config.name] = {
               ...updated[config.name],
               isLoading: false,
+              isChecked: true,
               error: error instanceof Error ? error.message : 'Failed to check activity',
             };
           }
@@ -105,10 +118,15 @@ export function useActivityCheck(chainSlug: ChainId) {
     }
   }, [address, chainSlug, checkAllMonths]);
 
-  // Auto-check when wallet connects or chain changes
+  // Auto-check only the current month when wallet connects
   useEffect(() => {
     if (isConnected && address) {
-      checkAllMonths();
+      const currentMonth = getCurrentMonth();
+      // Find the matching config for the current month
+      const hasCurrentMonth = currentMonth && monthConfigs.some((c) => c.name === currentMonth);
+      if (hasCurrentMonth) {
+        checkMonth(currentMonth);
+      }
     } else {
       // Reset results when disconnected
       setResults((prev) => {
@@ -119,13 +137,15 @@ export function useActivityCheck(chainSlug: ChainId) {
             chainSlug,
             hasActivity: false,
             isLoading: false,
+            isChecked: false,
             error: null,
           };
         });
         return reset;
       });
     }
-  }, [isConnected, address, chainSlug, checkAllMonths, monthConfigs]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isConnected, address, chainSlug]);
 
   return {
     results,
