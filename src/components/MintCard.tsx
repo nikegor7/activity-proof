@@ -18,11 +18,15 @@ export function MintCard({ chainSlug, month, activity }: MintCardProps) {
     isLoadingMintStatus,
     isMinting,
     isConfirming,
+    isConfirmTimeout,
     mint,
     error,
     txHash,
     isSuccess,
     reset,
+    totalSupply,
+    maxSupply,
+    isLoadingSupply,
   } = useMint(chainSlug, month);
 
   const monthConfigs = getMonthConfigsForChain(chainSlug);
@@ -49,7 +53,7 @@ export function MintCard({ chainSlug, month, activity }: MintCardProps) {
   // Determine card state
   const isLoading = activity?.isLoading || isLoadingMintStatus;
   const canMint = activity?.hasActivity && !hasMinted && !isLoading;
-  const isPending = isMinting || isConfirming;
+  const isPending = (isMinting || isConfirming) && !error && !isConfirmTimeout;
 
   return (
     <div
@@ -96,6 +100,22 @@ export function MintCard({ chainSlug, month, activity }: MintCardProps) {
         <h3 className="text-lg font-semibold text-white">
           {month} {config?.year}
         </h3>
+
+        {/* Supply Progress */}
+        {!isLoadingSupply && totalSupply !== undefined && maxSupply !== undefined && (
+          <div className="mt-2">
+            <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
+              <span>{Number(totalSupply).toLocaleString()} minted</span>
+              <span>{Number(maxSupply - totalSupply).toLocaleString()} remaining</span>
+            </div>
+            <div className="w-full h-1.5 bg-gray-700 rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-500 bg-gradient-to-r from-blue-500 to-purple-500"
+                style={{ width: `${Math.min((Number(totalSupply) / Number(maxSupply)) * 100, 100)}%` }}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Loading State */}
         {isLoading && (
@@ -179,6 +199,30 @@ export function MintCard({ chainSlug, month, activity }: MintCardProps) {
             >
               View transaction
             </a>
+          </div>
+        )}
+
+        {/* Confirmation Timeout - RPC lag */}
+        {isConfirmTimeout && !isSuccess && !error && txHash && (
+          <div className="mt-3 p-2 bg-yellow-500/20 rounded-lg">
+            <p className="text-sm text-yellow-400">
+              Transaction sent but confirmation is taking longer than expected.
+              {hasMinted ? ' It looks like the mint succeeded!' : ' Check the explorer to verify.'}
+            </p>
+            <a
+              href={`${chain.explorerUrl}/tx/${txHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-blue-400 hover:underline"
+            >
+              View on explorer
+            </a>
+            <button
+              onClick={reset}
+              className="mt-1 block text-xs text-gray-400 hover:text-white"
+            >
+              Dismiss
+            </button>
           </div>
         )}
 
