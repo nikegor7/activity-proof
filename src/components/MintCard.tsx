@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { type Month, type ActivityResult, type ChainId } from '@/types';
 import { useMint } from '@/hooks/useMint';
 import { getMonthConfigsForChain } from '@/lib/contracts';
@@ -33,6 +34,7 @@ export function MintCard({ chainSlug, month, activity }: MintCardProps) {
   const config = monthConfigs.find((c) => c.name === month);
   const chain = CHAINS[chainSlug];
   const [imageUrl, setImageUrl] = useState<string>('');
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     if (!config?.metadataURI) return;
@@ -44,9 +46,10 @@ export function MintCard({ chainSlug, month, activity }: MintCardProps) {
       .then((metadata) => {
         const imageCid = metadata.image.replace('ipfs://', '');
         setImageUrl(`${process.env.NEXT_PUBLIC_PINATA_GATEWAY}/${imageCid}`);
+        setImageError(false);
       })
-      .catch((err) => {
-        console.error('Failed to fetch NFT metadata:', err);
+      .catch(() => {
+        setImageError(true);
       });
   }, [config?.metadataURI]);
 
@@ -67,15 +70,21 @@ export function MintCard({ chainSlug, month, activity }: MintCardProps) {
     >
       {/* NFT Image */}
       <div className="aspect-square relative bg-gray-900">
-        {imageUrl && (
-          <img
+        {imageUrl && !imageError ? (
+          <Image
             src={imageUrl}
             alt={`${month} ${config?.year} NFT`}
-            className={`w-full h-full object-cover ${
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className={`object-cover ${
               !activity?.hasActivity && !hasMinted ? 'opacity-30 grayscale' : ''
             }`}
           />
-        )}
+        ) : imageError ? (
+          <div className="w-full h-full flex items-center justify-center text-gray-500 text-sm">
+            Failed to load image
+          </div>
+        ) : null}
 
         {/* Status Badge */}
         <div className="absolute top-3 right-3">
